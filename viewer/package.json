@@ -1,0 +1,21 @@
+{
+  "name": "proto-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The prototype storybook: a small React app that shows a workspace's design guide and HTML prototypes, live. pi-proto serves dist/ to the browser; nothing here is loaded into Pi.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.9.3"
+  }
+}
