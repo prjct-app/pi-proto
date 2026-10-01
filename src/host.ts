@@ -1,3 +1,4 @@
+import { repairToolArgs } from '@prjct.app/pi-tui-kit';
 import { existsSync } from 'node:fs';
 import { join, resolve, sep } from 'node:path';
 import type { ExtensionAPI, ExtensionContext } from '@earendil-works/pi-coding-agent';
@@ -42,6 +43,7 @@ export type ProtoController = Readonly<{
 const hasWorkspace = (project: ResolvedProject): boolean => existsSync(join(project.protoDir, 'proto.json'));
 
 export const installProto = (pi: ExtensionAPI, options: ProtoOptions = {}): ProtoController => {
+  repairToolArgs(pi);
   const ctxRef: { current: ExtensionContext | undefined } = { current: undefined };
   const sessionId = `${process.pid}-${Date.now().toString(36)}`;
   const state: {

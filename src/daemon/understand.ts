@@ -1,3 +1,4 @@
+import { JEV_MODEL } from '@prjct.app/pi-tui-kit';
 import type { Questions } from '@typesafe-ai/sdk';
 import type { Node, Prototype } from '../spec/schema.ts';
 
@@ -12,7 +13,7 @@ import type { Node, Prototype } from '../spec/schema.ts';
  */
 
 /** Pinned like pi-qa, pi-mcp and pi-memory: a silent model swap would move every threshold. */
-export const JEV_MODEL = 'jev-1.13.0';
+export { JEV_MODEL };
 /** An answer later than this is worth less than the agent starting now. */
 export const UNDERSTAND_TIMEOUT_MS = 1_500;
 
