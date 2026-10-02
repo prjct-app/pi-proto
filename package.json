@@ -59,7 +59,8 @@
     "check:immutable": "node --import tsx scripts/check-immutable.ts",
     "build:viewer": "npm --prefix viewer run build",
     "build:pi": "npm run build:viewer && node scripts/build-pi.mjs",
-    "daemon": "node --import tsx src/daemon/cli.ts"
+    "daemon": "node --import tsx src/daemon/cli.ts",
+    "prepack": "npm --prefix viewer ci --ignore-scripts --no-audit --no-fund && npm run build:viewer"
   },
   "peerDependencies": {
     "@earendil-works/pi-ai": "*",
