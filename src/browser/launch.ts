@@ -71,7 +71,10 @@ export const launchAndShoot = async (options: LaunchOptions): Promise<readonly S
   for (const vp of options.viewports) {
     const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
     const page = await ctx.newPage();
-    await page.goto(options.url, { waitUntil: 'networkidle' });
+    // Prototypes keep a live-reload stream open, so the network is never idle:
+    // wait for load, then give quiet requests a moment without failing the shot.
+    await page.goto(options.url, { waitUntil: 'load' });
+    await page.waitForLoadState('networkidle', { timeout: 2_000 }).catch(() => undefined);
     const safe = vp.label.replace(/[^a-z0-9-]+/gi, '_').toLowerCase();
     const file = join(options.outDir, `${safe}.png`);
     await mkdir(options.outDir, { recursive: true });
