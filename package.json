@@ -1,10 +1,12 @@
 {
   "name": "@prjct.app/pi-proto",
   "version": "0.1.0",
-  "private": true,
-  "description": "Prototype for Pi: a framework-neutral design guide and versioned HTML prototypes served by a local daemon.",
+    "description": "Prototype for Pi: a framework-neutral design guide and versioned HTML prototypes served by a local daemon.",
   "type": "module",
   "license": "MIT",
+  "repository": {"type": "git", "url": "git+https://github.com/prjct-app/pi-proto.git"},
+  "bugs": {"url": "https://github.com/prjct-app/pi-proto/issues"},
+  "homepage": "https://github.com/prjct-app/pi-proto#readme",
   "keywords": [
     "pi-package",
     "pi",
@@ -60,7 +62,7 @@
   },
   "dependencies": {
     "@napi-rs/keyring": "1.3.0",
-    "@prjct.app/pi-tui-kit": "file:../pi-tui-kit",
+    "@prjct.app/pi-tui-kit": "^0.3.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@typesafe-ai/sdk": "0.6.0",
     "gsap": "^3.12.5",
