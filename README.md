@@ -1,8 +1,16 @@
 # Prototype · pi-proto
 
+[![pi-proto — for PI Agent](https://raw.githubusercontent.com/prjct-app/pi-proto/main/docs/cover.png)](https://pi.dev)
+
 A framework-neutral design workspace with Pi as its agent. Its primary deliverable is a stable design guide: rationale, hierarchy, composition, typography/color roles, density, states and patterns to preserve or avoid. New pages extend that reasoning; an existing poor interface is a baseline, not a visual mandate. Tokens, guides and screens are separate deliverables. A component catalogue is optional, never a prerequisite.
 
 `proto_context` retrieves bounded local project evidence, the current guide and pi-memory's supported project decisions in one call. It detects frontend packages and declared/resolvable libraries, links reusable sources and caches unchanged inputs. It does not scaffold, build, execute source code or call a model. Native Pi design requests receive this snapshot automatically. MCP callers retrieve their own memory; the daemon never opens a parallel memory database.
+
+## Install
+
+```sh
+pi install npm:@prjct.app/pi-proto
+```
 
 ## How it works
 

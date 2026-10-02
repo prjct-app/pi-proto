@@ -1,11 +1,16 @@
 {
   "name": "@prjct.app/pi-proto",
-  "version": "0.1.0",
-    "description": "Prototype for Pi: a framework-neutral design guide and versioned HTML prototypes served by a local daemon.",
+  "version": "0.1.1",
+  "description": "Prototype for Pi: a framework-neutral design guide and versioned HTML prototypes served by a local daemon.",
   "type": "module",
   "license": "MIT",
-  "repository": {"type": "git", "url": "git+https://github.com/prjct-app/pi-proto.git"},
-  "bugs": {"url": "https://github.com/prjct-app/pi-proto/issues"},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prjct-app/pi-proto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prjct-app/pi-proto/issues"
+  },
   "homepage": "https://github.com/prjct-app/pi-proto#readme",
   "keywords": [
     "pi-package",
@@ -22,7 +27,8 @@
   "pi": {
     "extensions": [
       "./index.ts"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/prjct-app/pi-proto/main/docs/cover.png"
   },
   "files": [
     "index.ts",
@@ -39,7 +45,8 @@
     "README.md",
     "LICENSE",
     "CONTRIBUTING.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "docs/cover.png"
   ],
   "engines": {
     "node": ">=22.19.0"
@@ -62,7 +69,7 @@
   },
   "dependencies": {
     "@napi-rs/keyring": "1.3.0",
-    "@prjct.app/pi-tui-kit": "^0.3.0",
+    "@prjct.app/pi-tui-kit": "^0.3.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@typesafe-ai/sdk": "0.6.0",
     "gsap": "^3.12.5",
@@ -111,5 +118,8 @@
     "standalone": [
       "src/daemon/cli.ts"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
