@@ -64,7 +64,6 @@ Use `class: btn-primary` on prototype nodes. These patterns compile into Tailwin
 4. You write in the composer docked at the bottom of the storybook, like Pi's editor.
    - Exact commands to open a named page or undo run locally, without a model or Pi. Edits go straight to Pi with the selected element's versioned YAML. Undo creates a recoverable version and is deferred while the agent is working.
    - Each browser tab supplies its own page context. Selecting an element includes its current YAML/version directly; opt-in inference can also suggest a target.
-   - API clients can request Jev inference with `understand: true`; the default viewer never waits for it. The opt-in lookup/classification is bounded to 1500 ms and falls back to Pi on errors, weak confidence or missing credentials. Jev uses `TYPESAFE_API_KEY` or OS keyring; `PI_PROTO_OFFLINE=1` disables it.
    - Text and images arrive as your user message. Attach, paste or drag images; images over 1800 px are scaled down.
    - It also switches the session's model and thinking level, in sync with Pi.
    - Sending is acknowledged immediately. The dock shows the real agent activity and streams its visible text, not its private reasoning. When the turn ends, the final answer appears in the conversation. The agent can also answer there with `proto_reply`.

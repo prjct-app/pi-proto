@@ -9,7 +9,7 @@ npm run check:package
 ```
 
 Do not add `let` in `src/`. Pi packages stay peer dependencies. Use public Pi
-0.85.1 APIs only.
+1.0.4 APIs only.
 
 The extension is a client of the local proto daemon. Prototypes are versioned
 YAML changed through operations. The browser viewer's source lives in `viewer/`
@@ -42,13 +42,11 @@ Context budget is a hard rule for this package:
   do not publish idle/live badges to the TUI.
 - The daemon owns file watching and rendering. Serialize renders; defer
   coalesced docs/audits after edits. Scan exact live CSS candidates, not history.
-- Jev is opt-in (`understand: true`) and bounded: no key, errors, timeouts, images and uncertain
-  classifications must preserve the normal Pi path. Do not use it to judge taste.
+- Composer text, images, and selection reach Pi directly. Only exact local navigation and undo commands bypass the model.
 - Regenerate only inside documentation markers; preserve authored notes.
 
-`npm run test:browser` checks the real viewer against a local daemon with a
-deterministic Jev stub. The ordinary test suite stays offline and does not
-use API credentials. Neither is a measurement of live Jev model accuracy.
+`npm run test:browser` checks the real viewer against a local daemon and an offline
+Pi fixture. No test uses real model credentials or the OS keychain.
 
-Build the compiled copy Pi loads with `npm run build:pi`. It writes
-`~/.pi/agent/builds/pi-proto`, outside the repository.
+Publish this package independently and install from npm. Declare runtime package
+dependencies normally.

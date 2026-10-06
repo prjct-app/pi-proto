@@ -3,7 +3,7 @@ import { listPrototypes, readPrototype } from '../spec/store.ts';
 import type { Node } from '../spec/schema.ts';
 import type { TargetContext } from '../session-bridge.ts';
 import type { ProjectHub, Viewing } from './hub.ts';
-import { THRESHOLDS, understand, UNDERSTAND_TIMEOUT_MS, type Jev, type Understood } from './understand.ts';
+type Understood = Readonly<{ intent: 'navigate' | 'undo'; confidence: number; page?: Readonly<{ prototype: string; page: string; title: string }> }>;
 
 type Ask = Record<string, unknown>;
 export type AskResult = Readonly<{ status: number; body: { ok?: true; handled?: 'navigate' | 'undo'; error?: string } }>;
@@ -41,28 +41,6 @@ const localCommand = async (hub: ProjectHub, text: string, viewing?: Viewing): P
   return candidates.length === 1 ? { intent: 'navigate', confidence: 1, page: candidates[0]! } : undefined;
 };
 
-/** A bounded optional hint, including credential lookup. A stuck SDK cannot delay Pi indefinitely. */
-const classify = async (hub: ProjectHub, text: string, viewing: Viewing | undefined,
-  connect: () => Promise<Jev | undefined>, timeoutMs: number): Promise<Understood | undefined> => {
-  if (!text.trim() || text.length > 1000) return undefined;
-  const controller = new AbortController();
-  const clock: { timer?: NodeJS.Timeout } = {};
-  const timeout = new Promise<undefined>(resolve => {
-    clock.timer = setTimeout(() => { controller.abort(); resolve(undefined); }, timeoutMs);
-  });
-  const work = (async () => {
-    const jev = await connect();
-    if (!jev || controller.signal.aborted) return undefined;
-    const prototypes = (await Promise.all((await listPrototypes(hub.protoDir))
-      .map(id => readPrototype(hub.protoDir, id).catch(() => undefined)))).filter(p => p !== undefined);
-    if (controller.signal.aborted) return undefined;
-    return understand(jev, { text, prototypes, selected: !!viewing?.node,
-      current: viewing?.prototype ? { prototype: viewing.prototype, page: viewing.page } : undefined }, controller.signal);
-  })().catch(() => undefined);
-  try { return await Promise.race([work, timeout]); }
-  finally { clearTimeout(clock.timer); controller.abort(); }
-};
-
 /** Read the exact selected/inferred element, at its current version, for the agent. */
 const contextOf = async (hub: ProjectHub, target: Viewing | undefined): Promise<TargetContext | undefined> => {
   if (!target?.prototype || !target.node) return undefined;
@@ -79,8 +57,7 @@ const contextOf = async (hub: ProjectHub, target: Viewing | undefined): Promise<
 };
 
 /** The composer can navigate or undo locally; everything else remains the person's Pi message. */
-export const handleAsk = async (hub: ProjectHub, body: Ask, connect: () => Promise<Jev | undefined>,
-  timeoutMs = UNDERSTAND_TIMEOUT_MS): Promise<AskResult> => {
+export const handleAsk = async (hub: ProjectHub, body: Ask): Promise<AskResult> => {
   const text = typeof body['text'] === 'string' ? body['text'] : '';
   const images = Array.isArray(body['images']) ? body['images'] : [];
   if (body['artifact'] !== undefined && !['tokens', 'guide', 'prototype'].includes(String(body['artifact']))) return { status: 400, body: { error: 'Unknown requested deliverable.' } };
@@ -89,21 +66,18 @@ export const handleAsk = async (hub: ProjectHub, body: Ask, connect: () => Promi
   // redirect a command typed in another tab.
   const viewing = Object.hasOwn(body, 'target') ? viewingOf(body['target']) : hub.viewing;
   const direct = images.length ? undefined : await localCommand(hub, text, viewing);
-  const viewedVersion = (direct?.intent === 'undo' || body['understand'] === true) && viewing?.prototype
+  const viewedVersion = direct?.intent === 'undo' && viewing?.prototype
     ? await readPrototype(hub.protoDir, viewing.prototype).then(p => p.version, () => undefined) : undefined;
-  // Normal edits go straight to Pi with their selection. Remote inference is
-  // opt-in; neither credential lookup nor a model is on the default path.
-  const understood = direct ?? (!images.length && body['understand'] === true
-    ? await classify(hub, text, viewing, connect, timeoutMs) : undefined);
+  const understood = direct;
   const announce = (): void => hub.publish('ask', { text, images: images.length });
   const reply = (message: string): void => hub.publish('reply', { text: message, at: Date.now() });
-  if (understood?.intent === 'navigate' && understood.confidence >= THRESHOLDS.navigate && understood.page) {
+  if (understood?.intent === 'navigate' && understood.page) {
     announce();
     hub.publish('navigate', understood.page);
     reply(`Abierta «${understood.page.title}».`);
     return { status: 200, body: { ok: true, handled: 'navigate' } };
   }
-  if (understood?.intent === 'undo' && understood.confidence >= THRESHOLDS.undo
+  if (understood?.intent === 'undo'
     && hub.sessionSummary()?.agent.state !== 'working') {
     const prototype = understood.page?.prototype ?? viewing?.prototype;
     if (prototype) {
@@ -121,18 +95,11 @@ export const handleAsk = async (hub: ProjectHub, body: Ask, connect: () => Promi
       }
     }
   }
-  const inferred = understood?.intent === 'change' && understood.confidence >= THRESHOLDS.node ? understood : undefined;
-  const target: Viewing | undefined = inferred?.page || inferred?.node
-    ? { at: Date.now(), prototype: inferred.page?.prototype ?? inferred.node?.prototype ?? viewing?.prototype,
-      page: inferred.page?.page ?? inferred.node?.page ?? viewing?.page,
-      ...(!inferred.page || (inferred.page.prototype === viewing?.prototype && inferred.page.page === viewing?.page)
-        ? { node: viewing?.node } : {}), ...(inferred.node ? { node: inferred.node.id } : {}) }
-    : viewing;
+  const target = viewing;
   const context = await contextOf(hub, target).catch(() => undefined);
   if (!hub.toSession('ask', { ...body, text, viewing, target, context, understood })) {
     return { status: 409, body: { error: 'Ninguna sesión de Pi trabaja en este proyecto. Abre Pi en la carpeta del proyecto.' } };
   }
   announce();
-  if (inferred?.node) hub.publish('navigate', { prototype: inferred.node.prototype, page: inferred.node.page, node: inferred.node.id });
   return { status: 202, body: { ok: true } };
 };

@@ -33,7 +33,7 @@ test('rapid edits produce one build each; deferred generated docs do not rebuild
     assert.equal((await readPrototype(project.protoDir, 'inicio')).version, 4);
     assert.equal(await readFile(join(project.protoDir, 'dist', 'inicio.html'), 'utf8'), html);
   } finally {
-    hub.stop();
+    await hub.stop();
     if (old === undefined) delete process.env['PI_PROTO_HOME']; else process.env['PI_PROTO_HOME'] = old;
     await rm(home, { recursive: true, force: true });
     await rm(folder, { recursive: true, force: true });
