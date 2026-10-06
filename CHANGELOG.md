@@ -1,3 +1,10 @@
+## 0.2.0 (2026-10-06)
+- Wait for queued renders on daemon shutdown; align the browser check with the existing patterns guide.
+
+- Remove composer classification and its credential lookup.
+- Send ambiguous text, images and explicit selection directly to Pi; retain exact local navigation and undo.
+- Isolate tests from personal credentials and settings.
+
 # Changelog
 
 ## Unreleased

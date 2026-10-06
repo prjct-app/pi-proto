@@ -9,7 +9,6 @@ import type { Op } from '../spec/schema.ts';
 import { ProjectHub } from './hub.ts';
 import { handleMcp } from './mcp.ts';
 import { handleAsk } from './composer.ts';
-import { connectJev, type Jev } from './understand.ts';
 import { DAEMON_REVISION } from './lifecycle.ts';
 import { readTokens } from '../spec/tokens.ts';
 import { readDesign, writeDesign, writeTokens, type Reference } from '../design-guide.ts';
@@ -37,20 +36,11 @@ const json = (res: ServerResponse, status: number, body: unknown): void => {
 
 export type DaemonServer = Readonly<{ server: Server; port: number; url: string; hubs: Map<string, ProjectHub>; close(): Promise<void> }>;
 
-export const startServer = async (options: { home: string; port: number; viewer: string; host?: string; jev?: Jev | null; understandTimeoutMs?: number }): Promise<DaemonServer> => {
+export const startServer = async (options: { home: string; port: number; viewer: string; host?: string }): Promise<DaemonServer> => {
   const host = options.host ?? '127.0.0.1';
   const hubs = new Map<string, ProjectHub>();
   const starting = new Map<string, Promise<ProjectHub | undefined>>();
   const origin = { value: '' };
-  const classifier: { pending?: Promise<Jev | undefined>; client?: Jev } = {};
-  const jev = async (): Promise<Jev | undefined> => {
-    if (options.jev !== undefined) return options.jev ?? undefined;
-    if (classifier.client) return classifier.client;
-    classifier.pending ??= connectJev().then(client => { classifier.client = client; return client; })
-      .finally(() => { classifier.pending = undefined; });
-    return classifier.pending;
-  };
-
   const hubFor = async (projectId: string): Promise<ProjectHub | undefined> => {
     if (!/^p_[a-f0-9]+$/.test(projectId)) return undefined;
     const existing = hubs.get(projectId);
@@ -162,7 +152,7 @@ export const startServer = async (options: { home: string; port: number; viewer:
       if ((sub === '__ask' || sub === '__pi') && req.method === 'POST') {
         const body = await readJson(req) as Json;
         if (sub === '__ask') {
-          const result = await handleAsk(hub, body, jev, options.understandTimeoutMs);
+          const result = await handleAsk(hub, body);
           json(res, result.status, result.body);
           return;
         }
@@ -214,7 +204,7 @@ export const startServer = async (options: { home: string; port: number; viewer:
     hubs,
     async close() {
       await Promise.allSettled(starting.values());
-      for (const hub of hubs.values()) hub.stop();
+      await Promise.all([...hubs.values()].map(hub => hub.stop()));
       server.closeAllConnections?.();
       await new Promise<void>(ok => server.close(() => ok()));
     },

@@ -8,9 +8,7 @@ import YAML from 'yaml';
 import { initWorkspace } from '../src/spec/init.ts';
 import { readTokens } from '../src/spec/tokens.ts';
 import { startServer } from '../src/daemon/server.ts';
-import type { Jev } from '../src/daemon/understand.ts';
 
-const choice = (value: string) => ({ type: 'choice' as const, choice: value, confidence: 0.95 });
 
 test('the browser forwards selections immediately, navigates/undoes without Pi and works on mobile', { timeout: 60_000 }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'pi-proto-browser-'));
@@ -18,13 +16,7 @@ test('the browser forwards selections immediately, navigates/undoes without Pi a
   const previousHome = process.env['PI_PROTO_HOME'];
   process.env['PI_PROTO_HOME'] = home;
   const browser = await chromium.launch({ headless: true });
-  const jev: Jev = async state => {
-    const text = (state as { message: string }).message;
-    return text === 'abre pago' ? { intent: choice('navigate'), page: choice('inicio/pago') }
-      : text === 'deshaz' ? { intent: choice('undo') }
-      : { intent: choice('change'), node: choice('inicio/pago/pago-titulo') };
-  };
-  const server = await startServer({ home, port: 0, viewer: resolve('viewer/dist'), jev });
+  const server = await startServer({ home, port: 0, viewer: resolve('viewer/dist') });
   const controller = new AbortController();
   try {
     await writeFile(join(folder, 'package.json'), '{"name":"browser-fixture"}');
@@ -105,7 +97,7 @@ test('the browser forwards selections immediately, navigates/undoes without Pi a
     const p = await (await get('api/prototype?id=inicio')).json() as any;
     assert.equal(p.version, 3);
     assert.deepEqual(p.pages.map((pg: any) => pg.id), ['inicio']);
-    await page.getByRole('link', { name: 'Componentes', exact: true }).click();
+    await page.getByRole('link', { name: 'Patrones existentes', exact: true }).click();
     await page.frameLocator('.canvas iframe').getByRole('heading', { name: 'btn-primary', exact: true }).waitFor();
     const example = page.frameLocator('.canvas iframe').getByRole('button', { name: 'Continuar', exact: true });
     assert.equal(await example.evaluate(el => getComputedStyle(el).borderRadius), '28px');

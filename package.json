@@ -1,6 +1,6 @@
 {
   "name": "@prjct.app/pi-proto",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Prototype for Pi: a framework-neutral design guide and versioned HTML prototypes served by a local daemon.",
   "type": "module",
   "license": "MIT",
@@ -53,8 +53,8 @@
   },
   "scripts": {
     "check": "tsc --noEmit && npm run check:immutable && npm --prefix viewer run check",
-    "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
-    "test:browser": "npm run build:viewer && node --import tsx --test tests/viewer.browser.ts",
+    "test": "node --import ./tests/isolate.mjs --import tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test:browser": "npm run build:viewer && node --import ./tests/isolate.mjs --import tsx --test tests/viewer.browser.ts",
     "check:package": "npm pack --dry-run --ignore-scripts",
     "check:immutable": "node --import tsx scripts/check-immutable.ts",
     "build:viewer": "npm --prefix viewer run build",
@@ -69,10 +69,8 @@
     "typebox": "*"
   },
   "dependencies": {
-    "@napi-rs/keyring": "1.3.0",
-    "@prjct.app/pi-tui-kit": "^0.3.1",
+    "@prjct.app/pi-tui-kit": "^0.3.4",
     "@tailwindcss/postcss": "^4.3.3",
-    "@typesafe-ai/sdk": "0.6.0",
     "gsap": "^3.12.5",
     "linkedom": "^0.18.0",
     "marked": "^14.1.4",
@@ -82,16 +80,16 @@
     "playwright-core": "^1.50.1",
     "pngjs": "^7.0.0",
     "postcss": "^8.4.49",
-    "shell-quote": "1.8.3",
+    "shell-quote": "1.12.0",
     "tailwindcss": "^4.3.3",
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@earendil-works/pi-ai": "0.85.1",
-    "@earendil-works/pi-coding-agent": "0.85.1",
-    "@earendil-works/pi-tui": "0.85.1",
+    "@earendil-works/pi-ai": "1.0.4",
+    "@earendil-works/pi-coding-agent": "1.0.4",
+    "@earendil-works/pi-tui": "1.0.4",
     "@types/node": "^22.19.0",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.28.1",
     "tsx": "^4.20.0",
     "typebox": "^1.3.34",
     "typescript": "^5.9.3"
@@ -102,7 +100,6 @@
       "viewer/dist"
     ],
     "external": [
-      "@napi-rs/keyring",
       "playwright",
       "playwright-core",
       "tailwindcss",

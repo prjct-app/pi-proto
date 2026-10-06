@@ -40,6 +40,7 @@ export class ProjectHub {
   /** Versions this hub wrote itself, so the watcher does not render them twice. */
   private readonly written = new Map<string, number>();
   private stopWatch?: () => void;
+  private stopped = false;
   private rendering: Promise<unknown> = Promise.resolve();
   private docsTimer?: NodeJS.Timeout;
   private readonly generated = new Set([TOKENS_SLUG, COMPONENTS_SLUG, SITEMAP_SLUG, HANDOFF_SLUG].map(slug => `guide/${slug}.md`));
@@ -69,17 +70,20 @@ export class ProjectHub {
   async start(): Promise<boolean> {
     if (this.stopWatch) return true;
     if (!(await this.config())) return false;
+    this.stopped = false;
     this.stopWatch = this.watch();
     await this.render();
     return true;
   }
 
-  stop(): void {
+  async stop(): Promise<void> {
+    this.stopped = true;
     clearTimeout(this.docsTimer);
     this.stopWatch?.();
     this.stopWatch = undefined;
     for (const session of this.sessions.values()) session.res.end();
     this.sessions.clear();
+    await this.rendering;
   }
 
   /** Edits made outside the operations (another tool, a person in an editor) still show up. */
@@ -100,6 +104,7 @@ export class ProjectHub {
   }
 
   private async onFile(key: string): Promise<void> {
+    if (this.stopped) return;
     if (key.startsWith('guide/')) {
       const next = this.rendering.then(async () => {
         if (this.generated.has(key) && (await stat(join(this.protoDir, key)).catch(() => undefined))?.mtimeMs === this.generatedTimes.get(key)) return;
@@ -174,6 +179,7 @@ export class ProjectHub {
   }
 
   private scheduleDocs(): void {
+    if (this.stopped) return;
     clearTimeout(this.docsTimer);
     this.docsTimer = setTimeout(() => {
       this.docsTimer = undefined;
