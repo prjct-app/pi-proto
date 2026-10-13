@@ -68,16 +68,16 @@ test('the browser forwards selections immediately, navigates/undoes without Pi a
     const reader = stream.body!.getReader();
     const asked = (async () => {
       const decoder = new TextDecoder();
-      let buffer = '';
-      for (;;) {
+      const readAsk = async (buffer: string): Promise<unknown> => {
         const { done, value } = await reader.read();
         if (done) throw new Error('session ended before ask');
-        buffer += decoder.decode(value, { stream: true });
-        const blocks = buffer.split('\n\n');
-        buffer = blocks.pop() ?? '';
+        const text = buffer + decoder.decode(value, { stream: true });
+        const blocks = text.split('\n\n');
+        const rest = blocks.pop() ?? '';
         const block = blocks.find(b => b.startsWith('event: ask\n'));
-        if (block) return JSON.parse(block.split('\ndata: ')[1]!);
-      }
+        return block ? JSON.parse(block.split('\ndata: ')[1]!) : readAsk(rest);
+      };
+      return readAsk('');
     })();
     await page.getByRole('button', { name: 'Seleccionar', exact: true }).click();
     await canvas.locator('#pago-titulo').click();

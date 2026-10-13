@@ -453,8 +453,8 @@ function Canvas({ frameRef, src, page, reload, width }: { frameRef: React.RefObj
     if (last.current.src === src && last.current.reload === reload) {
       try { if (page) f.contentWindow!.location.hash = page; return; } catch { /* fall through */ }
     }
-    let hash = page ? `#${page}` : '';
-    if (!page && last.current.src === src) { try { hash = f.contentWindow?.location.hash || hash; } catch { /* */ } }
+    const initialHash = page ? `#${page}` : '';
+    const hash = !page && last.current.src === src ? frameHash(f, initialHash) : initialHash;
     last.current = { src, reload };
     f.src = `${src}?v=${reload}${hash}`;
   }, [src, page, reload, frameRef]);
@@ -706,3 +706,8 @@ function Dock({ disabled, sending, preview, noSession, about, selected, onClearS
 }
 
 createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
+
+/** The hash the frame is showing, or the fallback when the frame cannot be read. */
+function frameHash(frame: HTMLIFrameElement, fallback: string): string {
+  try { return frame.contentWindow?.location.hash || fallback; } catch { return fallback; }
+}

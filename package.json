@@ -1,6 +1,6 @@
 {
   "name": "@prjct.app/pi-proto",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Prototype for Pi: a framework-neutral design guide and versioned HTML prototypes served by a local daemon.",
   "type": "module",
   "license": "MIT",
@@ -53,7 +53,7 @@
   },
   "scripts": {
     "check": "tsc --noEmit && npm run check:immutable && npm --prefix viewer run check",
-    "test": "node --import ./tests/isolate.mjs --import tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test": "export PI_CODING_AGENT_DIR=\"$(mktemp -d)\" PRJCT_HOME=\"$(mktemp -d)\" && node --import ./tests/isolate.mjs --import tsx --test --test-concurrency=1 tests/*.test.ts",
     "test:browser": "npm run build:viewer && node --import ./tests/isolate.mjs --import tsx --test tests/viewer.browser.ts",
     "check:package": "npm pack --dry-run --ignore-scripts",
     "check:immutable": "node --import tsx scripts/check-immutable.ts",

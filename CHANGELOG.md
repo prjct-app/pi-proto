@@ -1,3 +1,8 @@
+## 0.2.1 (2026-10-12)
+
+- Code: no `let` bindings; mutable state lives in one named object. Behaviour is unchanged.
+- Tests run with temporary Pi and prjct folders, so they never touch your real configuration.
+
 ## 0.2.0 (2026-10-06)
 - Wait for queued renders on daemon shutdown; align the browser check with the existing patterns guide.
 
