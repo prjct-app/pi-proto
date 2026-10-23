@@ -83,7 +83,7 @@ test('the browser forwards selections immediately, navigates/undoes without Pi a
     await canvas.locator('#pago-titulo').click();
     await composer.fill('el título más chico');
     await composer.press('Enter');
-    const message = await asked;
+    const message = await asked as { target: { node: string }; context: { yaml: string } };
     assert.equal(message.target.node, 'pago-titulo');
     assert.match(message.context.yaml, /text: Pago/);
     await page.waitForFunction(() => !document.querySelector('.composer textarea')?.hasAttribute('disabled'));
